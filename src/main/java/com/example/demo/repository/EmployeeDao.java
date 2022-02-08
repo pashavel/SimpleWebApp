@@ -2,10 +2,8 @@ package com.example.demo.repository;
 
 import com.example.demo.model.Employee;
 import com.example.demo.model.Gender;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,25 +12,21 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Component
-@RequiredArgsConstructor
 public class EmployeeDao implements Dao<Employee,Long> {
-
-    private final Optional<Connection> connection;
-    public EmployeeDao() {
-        this.connection = DbConnection.getConnection();
+    private final DbConnection dbConnection;
+    public EmployeeDao(DbConnection dbConnection) {
+        this.dbConnection = dbConnection;
     }
 
     private static final Logger LOGGER =
             Logger.getLogger(EmployeeDao.class.getName());
-
-
 
     @Override
     public Optional<Employee> getEmployeeById(Long id) {
         Optional<Employee> Employee = Optional.empty();
         String sql = "SELECT * FROM Employee WHERE Employee_id = " + id;
 
-        try (Statement statement = connection.get().createStatement();
+        try (Statement statement = dbConnection.getConnection().get().createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
             if(resultSet.next()) {
@@ -62,7 +56,7 @@ public class EmployeeDao implements Dao<Employee,Long> {
         Employee employee = new Employee();
         String sql = "SELECT * FROM Employee";
 
-        try (Statement statement = connection.get().createStatement();
+        try (Statement statement = dbConnection.getConnection().get().createStatement();
              ResultSet resultSet = statement.executeQuery(sql)) {
 
             while(resultSet.next()) {
@@ -76,7 +70,6 @@ public class EmployeeDao implements Dao<Employee,Long> {
 
                 employee = new Employee(employeeId, firstName,gender,departmentId,jobTitle,lastName,dateOfBirth );
                 employees.add(employee);
-
                 LOGGER.log(Level.INFO, "Found {0} in database", employee);
             }
         } catch (SQLException ex) {
@@ -96,7 +89,7 @@ public class EmployeeDao implements Dao<Employee,Long> {
                     employee.getGender() + "','" +
                     employee.getDateOfBirth() + "','" +
                     employee.getJobTitle() + "');";
-        try (Statement statement = connection.get().createStatement()) {
+        try (Statement statement = dbConnection.getConnection().get().createStatement()) {
             statement.executeQuery(sql);
             LOGGER.log(Level.INFO, "Added to database", employee);
         }
@@ -117,8 +110,7 @@ public class EmployeeDao implements Dao<Employee,Long> {
                 + "date_of_birth='"+employee.getDateOfBirth() + "',"
                 + "job_title='"+employee.getJobTitle() + "' "
                 + "WHERE employee_id="+employee.getEmployeeId()+";";
-        System.out.println(sql);
-        try (Statement statement = connection.get().createStatement()) {
+        try (Statement statement = dbConnection.getConnection().get().createStatement()) {
             statement.executeQuery(sql);
             LOGGER.log(Level.INFO, "Added to database", employee);
         }
@@ -130,7 +122,7 @@ public class EmployeeDao implements Dao<Employee,Long> {
     @Override
     public void deleteEmployee(Long id) {
         String sql = "DELETE FROM employee WHERE employee_id=" + id;
-        try (Statement statement = connection.get().createStatement()) {
+        try (Statement statement = dbConnection.getConnection().get().createStatement()) {
             statement.executeQuery(sql);
             LOGGER.log(Level.INFO, "Deleted from database with id = ", id);
         }

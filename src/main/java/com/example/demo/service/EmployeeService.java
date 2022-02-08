@@ -2,20 +2,17 @@ package com.example.demo.service;
 
 import com.example.demo.model.Employee;
 import com.example.demo.repository.Dao;
-import com.example.demo.repository.EmployeeDao;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EmployeeService implements Dao<Employee,Long> {
-    private final EmployeeDao employeeDao;
-
-    public EmployeeService(EmployeeDao employeeDao) {
+public class EmployeeService implements IService<Employee,Long> {
+    private final Dao<Employee,Long> employeeDao;
+    public EmployeeService(Dao<Employee,Long> employeeDao) {
         this.employeeDao = employeeDao;
     }
-
     @Override
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeDao.getEmployeeById(id);
@@ -30,7 +27,6 @@ public class EmployeeService implements Dao<Employee,Long> {
         employeeDao.saveEmployee(employee);
         return Optional.empty();
     }
-
     @Override
     public void updateEmployee(Employee employee) {
         Employee oldEmployee = employeeDao.getEmployeeById(employee.getEmployeeId()).orElse(new Employee());
@@ -42,7 +38,6 @@ public class EmployeeService implements Dao<Employee,Long> {
         if(employee.getFirstName() != null) oldEmployee.setFirstName(employee.getFirstName());
         employeeDao.updateEmployee(oldEmployee);
     }
-
     @Override
     public void deleteEmployee(Long id) {
         employeeDao.deleteEmployee(id);
